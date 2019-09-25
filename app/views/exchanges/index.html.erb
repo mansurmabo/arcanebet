@@ -1,4 +1,16 @@
 <h2>
   Exchange Rates
 </h2>
-  
+<h3 id="_exchanges_result"></h3>
+<%= simple_form_for exchanges_path, method: :get do |f| %>
+  <%= f.input :amount, label: 'amount', input_html: {value: 1}, required: false %>
+  <%= f.input :base, collection: @currencies_options, label: 'base', selected: @base, required: false %>
+  <%= f.input :result, label: 'result', input_html: {value: @result}, required: false %>
+  <%= f.input :target, collection: @currencies_options, label: 'target', selected: @target, required: false %>
+
+
+  <%= f.input :rate, label: 'rate', input_html: {value: @rate_value} %>
+  <%= f.input :duration, collection: 1..25, label: 'duration', selected: @duration, required: false %>
+
+  <%= f.submit 'Save' %>
+<% end %>
