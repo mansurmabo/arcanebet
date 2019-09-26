@@ -1,16 +1,76 @@
 <h2>
   Exchange Rates
 </h2>
-<h3 id="_exchanges_result"></h3>
+<canvas id="myChart" width="1200" height="600"></canvas>
+<div id="chart_data" data-historical-rates="<%= @historical_rates.to_json%>"></div>
+
 <%= simple_form_for exchanges_path, method: :get do |f| %>
-  <%= f.input :amount, label: 'amount', input_html: {value: 1}, required: false %>
-  <%= f.input :base, collection: @currencies_options, label: 'base', selected: @base, required: false %>
-  <%= f.input :result, label: 'result', input_html: {value: @result}, required: false %>
-  <%= f.input :target, collection: @currencies_options, label: 'target', selected: @target, required: false %>
-
-
-  <%= f.input :rate, label: 'rate', input_html: {value: @rate_value} %>
-  <%= f.input :duration, collection: 1..25, label: 'duration', selected: @duration, required: false %>
-
-  <%= f.submit 'Save' %>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-sm">
+        <%= f.input :amount, label: 'amount', input_html: {class: "form-control", value: @amount}, required: false %>
+      </div>
+      <div class="col-sm">
+        <%= f.input :rate, label: 'rate', input_html: {class: "form-control", value: @today_rate} %>
+      </div>
+      <div class="col-sm">
+        <%= f.input :result, label: 'result', input_html: {class: "form-control", value: @calculated_amount}, required: false %>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm">
+        <%= f.input :base,
+                    collection: @currencies_options,
+                    label: 'base',
+                    selected: @base,
+                    required: false,
+                    input_html: {class: "form-control"}
+        %>
+      </div>
+      <div class="col-sm">
+        <%= f.input :target,
+                    collection: @currencies_options,
+                    label: 'target',
+                    selected: @target,
+                    required: false,
+                    input_html: {class: "form-control"}
+        %>
+      </div>
+      <div class="col-sm">
+        <%= f.input :duration,
+                    collection: 1..25,
+                    label: 'last weeks number',
+                    selected: @duration,
+                    required: false,
+                    input_html: {class: "form-control"}
+        %>
+      </div>
+    </div>
+  </div>
+  <%= f.submit 'Save', class: 'btn btn-primary ' %>
 <% end %>
+
+<table class="table">
+  <thead class="thead-dark">
+  <tr>
+    <th scope="col">Last Week #</th>
+    <th scope="col">Year/Week #</th>
+    <th scope="col">Rate For a Week</th>
+    <th scope="col">Profit/Lost</th>
+    <th scope="col">Highest</th>
+    <th scope="col">Lowest</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @table_rates.each_with_index do |rate, index| %>
+    <tr>
+      <th scope="row"><%= index + 1 %></th>
+      <td><%= rate[:year] %>/<%= rate[:week_number] %></td>
+      <td><%= rate[:avg_rate] %></td>
+      <td><%= (@today_rate - rate[:avg_rate]).round(3) %></td>
+      <td><%= rate[:highest] %></td>
+      <td><%= rate[:lowest] %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

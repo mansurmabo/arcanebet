@@ -1,44 +1,73 @@
 class ExchangesController < ApplicationController
   def index
     @currencies_options = Rate.currencies
-    @base = params['/exchanges']['base'] || 'EUR'
-    @target = params['/exchanges']['target'] || 'USD'
-    @amount = params['/exchanges']['amount'] || 1
-    @duration = params['/exchanges']['duration'] || 1
+    @base = params['/exchanges'] && params['/exchanges']['base'] || 'EUR'
+    @target = params['/exchanges'] && params['/exchanges']['target'] || 'USD'
+    @amount = params['/exchanges'] && params['/exchanges']['amount'] || 1
+    @duration = params['/exchanges'] && params['/exchanges']['duration'] || 1
 
-    date = (Time.zone.now).strftime('%Y-%m-%d')
+    @historical_rates = historical_rates
+    @today_rate = @historical_rates.last[:rate]
+    @calculated_amount = calculate(@amount, @today_rate)
 
-    @rate_value = fetch_by_target(date, @base, @target)
-    @result = calculate(@amount, @rate_value)
+    @table_rates = rates_per_week
+  end
+
+  def create
+
+  end
+
+  private
+
+  def rates_per_week
+    rates = []
+    @historical_rates.each do |rate|
+      week_number = rate[:week_number]
+      next if rates.find { |r| r[:week_number] == week_number }
+
+      part = @historical_rates.select { |r| r[:week_number] == week_number }
+      part_rates = part.map { |p| p[:rate] }
+      avg_rate = part_rates.inject { |sum, el| sum + el }.to_f / part_rates.size
+      rates.push(
+          {
+              year: Date.parse(rate[:date]).year,
+              week_number: week_number,
+              avg_rate: avg_rate.round(3),
+              highest: part_rates.max,
+              lowest: part_rates.min
+          }
+      )
+    end
+
+    rates.reverse
+  end
+
+  def historical_rates
+    duration_days = @duration.to_i * 7
+    mapped_rates = []
+    end_date = (Time.zone.now).strftime('%Y-%m-%d')
+    start_date = (Time.zone.now - duration_days.days).strftime('%Y-%m-%d')
+
+    rates = fetch_rates(start_date, end_date, @base)
+    rates.each do |date, currencies|
+      mapped_rates.push({date: date, rate: currencies[@target], week_number: Date.parse(date).strftime('%W')})
+    end
+
+    mapped_rates.sort_by { |r| r[:date] }
   end
 
   def calculate(amount, rate)
-     amount.to_f * rate.to_f
+    (amount.to_f * rate.to_f).round(3)
   end
 
-  def fetch_by_target(date, base, target)
-    rate = local_rate(date, base)
+  def fetch_rates(start_date, end_date, base)
+    fixer = ExchangeRateApi.new(start_date: start_date, end_date: end_date, base: base)
 
-    if rate.present?
-      rate.rates[target]
-    else
-      created_rate = fetch_and_save_rate(date, base)
-      created_rate.rates[target]
+    if fixer.historical.parsed_response['error']
+      raise fixer.historical.parsed_response['error']
     end
-  end
 
-  def local_rate(date, base)
-    Rate.where(date: date, base: base).first
-  end
-
-  def fetch_and_save_rate(date, base)
-    fixer = Fixer.new(date: date, base: base)
-    if fixer.historical.parsed_response['success']
-      parsed_rates = fixer.historical.parsed_response['rates']
-      Rate.create(date: date, base: base, rates: parsed_rates)
-    else
-      raise fixer.historical.parsed_response['error']['type']
-    end
+    fixer.historical.parsed_response['rates']
   end
 
 end
