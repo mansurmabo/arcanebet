@@ -13,7 +13,7 @@ $(document).ready(function () {
       labels: data.map(d => d.date),
       datasets: [
         {
-          label: '# of Rate',
+          label: '# of Exchange',
           data: data.map(d => d.rate),
           pointBackgroundColor: pointBackgroundColors,
           backgroundColor: [
@@ -27,8 +27,13 @@ $(document).ready(function () {
       ]
     },
     options: {
-      responsive: false,
-      lineTension: 0,
+      elements: {
+        line: {
+          tension: 0
+        }
+      },
+
+      // responsive: false,
     }
   });
 

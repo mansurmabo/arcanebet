@@ -15,10 +15,14 @@ ActiveRecord::Schema.define(version: 2019_09_25_193127) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "rates", force: :cascade do |t|
-    t.date "date"
+  create_table "exchanges", force: :cascade do |t|
+    t.decimal "amount"
+    t.decimal "rate"
+    t.decimal "result"
     t.string "base"
-    t.json "rates"
+    t.string "target"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
 end

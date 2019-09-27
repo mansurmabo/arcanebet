@@ -1,76 +1,31 @@
-<h2>
-  Exchange Rates
-</h2>
-<canvas id="myChart" width="1200" height="600"></canvas>
-<div id="chart_data" data-historical-rates="<%= @historical_rates.to_json%>"></div>
-
-<%= simple_form_for exchanges_path, method: :get do |f| %>
-  <div class="form-group">
-    <div class="row">
-      <div class="col-sm">
-        <%= f.input :amount, label: 'amount', input_html: {class: "form-control", value: @amount}, required: false %>
-      </div>
-      <div class="col-sm">
-        <%= f.input :rate, label: 'rate', input_html: {class: "form-control", value: @today_rate} %>
-      </div>
-      <div class="col-sm">
-        <%= f.input :result, label: 'result', input_html: {class: "form-control", value: @calculated_amount}, required: false %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-sm">
-        <%= f.input :base,
-                    collection: @currencies_options,
-                    label: 'base',
-                    selected: @base,
-                    required: false,
-                    input_html: {class: "form-control"}
-        %>
-      </div>
-      <div class="col-sm">
-        <%= f.input :target,
-                    collection: @currencies_options,
-                    label: 'target',
-                    selected: @target,
-                    required: false,
-                    input_html: {class: "form-control"}
-        %>
-      </div>
-      <div class="col-sm">
-        <%= f.input :duration,
-                    collection: 1..25,
-                    label: 'last weeks number',
-                    selected: @duration,
-                    required: false,
-                    input_html: {class: "form-control"}
-        %>
-      </div>
-    </div>
-  </div>
-  <%= f.submit 'Save', class: 'btn btn-primary ' %>
-<% end %>
-
+<h1>Listing exchanges</h1>
 <table class="table">
   <thead class="thead-dark">
   <tr>
-    <th scope="col">Last Week #</th>
-    <th scope="col">Year/Week #</th>
-    <th scope="col">Rate For a Week</th>
-    <th scope="col">Profit/Lost</th>
-    <th scope="col">Highest</th>
-    <th scope="col">Lowest</th>
+    <th scope="col">amount</th>
+    <th scope="col">rate</th>
+    <th scope="col">result</th>
+    <th scope="col">base currency</th>
+    <th scope="col">target currency</th>
+    <th scope="col"></th>
+    <th scope="col"></th>
+    <th scope="col"></th>
   </tr>
   </thead>
   <tbody>
-  <% @table_rates.each_with_index do |rate, index| %>
+  <% @exchanges.each do |exchange| %>
     <tr>
-      <th scope="row"><%= index + 1 %></th>
-      <td><%= rate[:year] %>/<%= rate[:week_number] %></td>
-      <td><%= rate[:avg_rate] %></td>
-      <td><%= (@today_rate - rate[:avg_rate]).round(3) %></td>
-      <td><%= rate[:highest] %></td>
-      <td><%= rate[:lowest] %></td>
+      <th scope="row"><%= exchange.amount %></th>
+      <td><%= exchange.amount %></td>
+      <td><%= exchange.rate %></td>
+      <td><%= exchange.result %></td>
+      <td><%= exchange.base %></td>
+      <td><%= exchange.target %></td>
+      <td><%= link_to 'Edit', edit_exchange_path(exchange), class: 'btn btn-info'%></td>
+      <td><%= link_to 'Destroy', exchange, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger' %></td>
     </tr>
   <% end %>
   </tbody>
 </table>
+
+<%= link_to 'Dashboard', root_url, turbolinks: false, class: 'btn btn-primary' %>

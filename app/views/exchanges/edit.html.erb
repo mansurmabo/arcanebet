@@ -1,0 +1,29 @@
+<h2>
+  Edit Exchange Rate
+</h2>
+<%= simple_form_for @exchange, method: :put do |f| %>
+  <div class="form-group">
+
+    <%= f.input :amount, label: 'amount', input_html: {class: "form-control"}, required: false %>
+
+    <%= f.input :rate, label: 'rate', input_html: {class: "form-control"} %>
+
+    <%= f.input :result, label: 'result', input_html: {class: "form-control"}, required: false %>
+
+    <%= f.input :base,
+                collection: @currencies_options,
+                label: 'base',
+                required: false,
+                input_html: {class: "form-control"}
+    %>
+
+    <%= f.input :target,
+                collection: @currencies_options,
+                label: 'target',
+                required: false,
+                input_html: {class: "form-control"}
+    %>
+  </div>
+  <%= f.submit 'Save', class: 'btn btn-success' %>
+  <%= link_to 'Cancel', exchanges_path, class: 'btn btn-primary' %>
+<% end %>
