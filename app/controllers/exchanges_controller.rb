@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ExchangesController < ApplicationController
+  before_action :fetch_rates
+
   def dashboard
     @exchange = Exchange.new
     @currencies_options = Exchange.currencies
@@ -9,10 +11,10 @@ class ExchangesController < ApplicationController
     @target = params[:target] || 'USD'
     @duration = params[:duration] || 1
 
-    @historical_rates = historical_rates
+    @historical_rates = fetch_rates[:chart_rates]
     @today_rate = @historical_rates.last[:rate]
     @calculated_amount = multiply(@amount, @today_rate)
-    @table_rates = rates_per_week
+    @table_rates = fetch_rates[:statistic_rates]
   end
 
   def index
@@ -56,47 +58,9 @@ class ExchangesController < ApplicationController
     params.require(:exchange).permit(:amount, :rate, :result, :base, :target)
   end
 
-  def rates_per_week
-    rates = []
-    @historical_rates.each do |rate|
-      week_number = rate[:week_number]
-      next if rates.find { |r| r[:week_number] == week_number }
-
-      part = @historical_rates.select { |r| r[:week_number] == week_number }
-      part_rates = part.map { |p| p[:rate] }
-      avg_rate = part_rates.inject { |sum, el| sum + el }.to_f / part_rates.size
-      rates.push(
-        year: Date.parse(rate[:date]).year,
-        week_number: week_number,
-        avg_rate: avg_rate.round(3),
-        highest: part_rates.max.round(3),
-        lowest: part_rates.min.round(3)
-      )
-    end
-
-    rates.reverse
-  end
-
-  def historical_rates
-    duration_days = @duration.to_i * 7
-    end_date = (Time.zone.now).strftime('%Y-%m-%d')
-    start_date = (Time.zone.now - duration_days.days).strftime('%Y-%m-%d')
-
-    rates = fetch_rates(start_date, end_date, @base)
-
-    mapped_rates = []
-    rates.each do |date, currencies|
-      mapped_rates.push(date: date, rate: currencies[@target], week_number: Date.parse(date).strftime('%W'))
-    end
-
-    mapped_rates.sort_by { |r| r[:date] }
-  end
-
-  def fetch_rates(start_date, end_date, base)
-    exchange_rate = ExchangeRateApi.new(start_date: start_date, end_date: end_date, base: base)
-    raise exchange_rate.historical.parsed_response['error'] if exchange_rate.historical.parsed_response['error']
-
-    exchange_rate.historical.parsed_response['rates']
+  def fetch_rates
+    client = ExchangesClientService.new({type: Exchange.apis[:exchange_rate], base: @base, target: @target, duration: @duration})
+    client.call
   end
 
   def multiply(amount, rate)

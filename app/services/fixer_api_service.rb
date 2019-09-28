@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
-class ExchangeRateApi
+class FixerApiService
   include HTTParty
   attr_accessor :base, :start_date, :end_date
 
-  base_uri 'http://api.exchangeratesapi.io'
+  base_uri 'http://data.fixer.io/api'
 
   def initialize(options = {})
     @options = {
       query: {
+        access_key: ENV['FIXER_ACCESS_KEY'],
         base: options[:base],
-        start_at: options[:start_date],
-        end_at: options[:end_date],
+        start_date: options[:start_date],
+        end_date: options[:end_date]
       }
     }
   end
@@ -21,6 +22,6 @@ class ExchangeRateApi
   end
 
   def historical
-    self.class.get('/history', @options)
+    self.class.get('/timeseries', @options)
   end
 end

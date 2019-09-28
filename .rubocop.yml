@@ -85,4 +85,4 @@ Style/SymbolArray:
 # SupportedStylesForMultiline: comma, consistent_comma, no_comma
 Style/TrailingCommaInHashLiteral:
   Exclude:
-    - 'app/models/exchange_rate_api.rb'
+    - 'app/models/exchange_rates_api_service.rb'
