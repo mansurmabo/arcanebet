@@ -1,6 +1,6 @@
-const Chart = require('chart.js');
+const ready = () => {
+  const Chart = require('chart.js');
 
-$(document).ready(function () {
   const ctx = document.getElementById('myChart').getContext('2d');
   const dataEl = document.getElementById('chart_data')
   const data = JSON.parse(dataEl.dataset['historicalRates'])
@@ -33,7 +33,7 @@ $(document).ready(function () {
         }
       },
 
-      // responsive: false,
+      responsive: false,
     }
   });
 
@@ -51,4 +51,6 @@ $(document).ready(function () {
   })
 
   myChart.update();
-});
+};
+
+$(document).on('turbolinks:load', ready);
