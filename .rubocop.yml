@@ -1,0 +1,88 @@
+AllCops:
+  Exclude:
+    - db/**
+    - config/**
+    - script/**
+    - node_modules/**/*
+    - test/**/*
+    - bin/bundle
+
+
+Documentation:
+  Enabled: false
+
+# Offense count: 2
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: empty_lines, no_empty_lines
+Layout/EmptyLinesAroundBlockBody:
+  Exclude:
+    - 'db/schema.rb'
+
+Metrics/LineLength:
+  Max: 120
+
+Metrics/PerceivedComplexity:
+  Max: 9
+
+
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: MinDigits, Strict.
+Style/NumericLiterals:
+  Exclude:
+    - 'db/schema.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: PreferredDelimiters.
+Style/PercentLiteralDelimiters:
+  Exclude:
+    - 'app/models/exchange.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+Style/PerlBackrefs:
+  Exclude:
+    - 'bin/bundle'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+Style/RedundantBegin:
+  Exclude:
+    - 'bin/yarn'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+Style/RedundantParentheses:
+  Exclude:
+    - 'app/controllers/exchanges_controller.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: .
+# SupportedStyles: use_perl_names, use_english_names
+Style/SpecialGlobalVars:
+  EnforcedStyle: use_perl_names
+
+# Offense count: 2
+# Cop supports --auto-correct.
+Style/StderrPuts:
+  Exclude:
+    - 'bin/yarn'
+
+# Offense count: 2
+# Cop supports --auto-correct.
+# Configuration parameters: MinSize.
+# SupportedStyles: percent, brackets
+Style/SymbolArray:
+  EnforcedStyle: brackets
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyleForMultiline.
+# SupportedStylesForMultiline: comma, consistent_comma, no_comma
+Style/TrailingCommaInHashLiteral:
+  Exclude:
+    - 'app/models/exchange_rate_api.rb'

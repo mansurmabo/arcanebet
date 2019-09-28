@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ExchangeRateApi
   include HTTParty
   attr_accessor :base, :start_date, :end_date
@@ -6,11 +8,11 @@ class ExchangeRateApi
 
   def initialize(options = {})
     @options = {
-        query: {
-          base: options[:base],
-          start_at: options[:start_date],
-          end_at: options[:end_date],
-        }
+      query: {
+        base: options[:base],
+        start_at: options[:start_date],
+        end_at: options[:end_date],
+      }
     }
   end
 

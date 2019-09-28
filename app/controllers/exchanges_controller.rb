@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class ExchangesController < ApplicationController
   def dashboard
-    @exchange = Exchange.new()
+    @exchange = Exchange.new
     @currencies_options = Exchange.currencies
     @amount = params[:amount] || 1
     @base = params[:base] || 'EUR'
@@ -39,7 +41,6 @@ class ExchangesController < ApplicationController
     else
       format.html { render action: 'edit' }
     end
-
   end
 
   def destroy
@@ -65,13 +66,11 @@ class ExchangesController < ApplicationController
       part_rates = part.map { |p| p[:rate] }
       avg_rate = part_rates.inject { |sum, el| sum + el }.to_f / part_rates.size
       rates.push(
-          {
-              year: Date.parse(rate[:date]).year,
-              week_number: week_number,
-              avg_rate: avg_rate.round(3),
-              highest: part_rates.max.round(3),
-              lowest: part_rates.min.round(3)
-          }
+        year: Date.parse(rate[:date]).year,
+        week_number: week_number,
+        avg_rate: avg_rate.round(3),
+        highest: part_rates.max.round(3),
+        lowest: part_rates.min.round(3)
       )
     end
 
@@ -86,7 +85,7 @@ class ExchangesController < ApplicationController
 
     rates = fetch_rates(start_date, end_date, @base)
     rates.each do |date, currencies|
-      mapped_rates.push({date: date, rate: currencies[@target], week_number: Date.parse(date).strftime('%W')})
+      mapped_rates.push(date: date, rate: currencies[@target], week_number: Date.parse(date).strftime('%W'))
     end
 
     mapped_rates.sort_by { |r| r[:date] }
@@ -97,13 +96,9 @@ class ExchangesController < ApplicationController
   end
 
   def fetch_rates(start_date, end_date, base)
-    fixer = ExchangeRateApi.new(start_date: start_date, end_date: end_date, base: base)
+    exchange_rate = ExchangeRateApi.new(start_date: start_date, end_date: end_date, base: base)
+    raise exchange_rate.historical.parsed_response['error'] if exchange_rate.historical.parsed_response['error']
 
-    if fixer.historical.parsed_response['error']
-      raise fixer.historical.parsed_response['error']
-    end
-
-    fixer.historical.parsed_response['rates']
+    exchange_rate.historical.parsed_response['rates']
   end
-
 end
