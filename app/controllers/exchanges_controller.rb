@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ExchangesController < ApplicationController
-  before_action :fetch_rates
-
   def dashboard
     @exchange = Exchange.new
     @currencies_options = Exchange.currencies
@@ -10,10 +8,11 @@ class ExchangesController < ApplicationController
     @base = params[:base] || 'EUR'
     @target = params[:target] || 'USD'
     @duration = params[:duration] || 1
-    @historical_rates = fetch_rates[:chart_rates]
+    rates = fetch_rates
+    @historical_rates = rates[:chart_rates]
     @today_rate = @historical_rates.last[:rate]
     @calculated_amount = multiply(@amount, @today_rate)
-    @table_rates = fetch_rates[:statistic_rates]
+    @table_rates = rates[:statistic_rates]
   end
 
   def index

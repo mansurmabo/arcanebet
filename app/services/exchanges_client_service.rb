@@ -4,10 +4,10 @@ class ExchangesClientService
   attr_accessor :type, :base, :target, :duration
 
   def initialize(options)
-    @type = options[:type]
-    @base = options[:base]
-    @target = options[:target]
-    @duration = options[:duration]
+    @type = options[:type] || Exchange.apis[:exchange_rate]
+    @base = options[:base] || 'EUR'
+    @target = options[:target] || 'USD'
+    @duration = options[:duration] || 1
   end
 
   def call
@@ -74,10 +74,15 @@ class ExchangesClientService
   end
 
   def exchange_rate_api
+    request = RequestOption.where(options).first
+    return request.rate.values if request.present?
+
     exchange_rates = ExchangeRatesApiService.new(options)
     raise exchange_rates.historical.parsed_response['error'] if exchange_rates.historical.parsed_response['error']
 
-    exchange_rates.historical.parsed_response['rates']
+    request = RequestOption.create(options)
+    rates = request.create_rate(values: exchange_rates.historical.parsed_response['rates'])
+    rates.values
   end
 
   def fixer_api
