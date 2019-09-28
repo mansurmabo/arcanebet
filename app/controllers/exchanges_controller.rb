@@ -11,7 +11,7 @@ class ExchangesController < ApplicationController
 
     @historical_rates = historical_rates
     @today_rate = @historical_rates.last[:rate]
-    @calculated_amount = calculate(@amount, @today_rate)
+    @calculated_amount = multiply(@amount, @today_rate)
     @table_rates = rates_per_week
   end
 
@@ -79,20 +79,17 @@ class ExchangesController < ApplicationController
 
   def historical_rates
     duration_days = @duration.to_i * 7
-    mapped_rates = []
     end_date = (Time.zone.now).strftime('%Y-%m-%d')
     start_date = (Time.zone.now - duration_days.days).strftime('%Y-%m-%d')
 
     rates = fetch_rates(start_date, end_date, @base)
+
+    mapped_rates = []
     rates.each do |date, currencies|
       mapped_rates.push(date: date, rate: currencies[@target], week_number: Date.parse(date).strftime('%W'))
     end
 
     mapped_rates.sort_by { |r| r[:date] }
-  end
-
-  def calculate(amount, rate)
-    (amount.to_f * rate.to_f).round(3)
   end
 
   def fetch_rates(start_date, end_date, base)
@@ -101,4 +98,9 @@ class ExchangesController < ApplicationController
 
     exchange_rate.historical.parsed_response['rates']
   end
+
+  def multiply(amount, rate)
+    (amount.to_f * rate.to_f).round(3)
+  end
+
 end
