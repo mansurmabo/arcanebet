@@ -75,20 +75,23 @@ class ExchangesClientService
 
   def exchange_rate_api
     request = RequestOption.where(options).first
-    return request.rate.values if request.present?
-
-    exchange_rates = ExchangeRatesApiService.new(options)
-    raise exchange_rates.historical.parsed_response['error'] if exchange_rates.historical.parsed_response['error']
-
-    request = RequestOption.create(options)
-    rates = request.create_rate(values: exchange_rates.historical.parsed_response['rates'])
-    rates.values
+    request.present? ? request.rate.values : fetch_and_create_rates(ExchangeRatesApiService.new(options))
   end
 
   def fixer_api
-    exchange_rates = FixerApiService.new(options)
+    request = RequestOption.where(options).first
+    request.present? ? request.rate.values : fetch_and_create_rates(FixerApiService.new(options))
+  end
+
+  def fetch_and_create_rates(exchange_rates)
     raise exchange_rates.historical.parsed_response['error'] if exchange_rates.historical.parsed_response['error']
 
-    exchange_rates.historical.parsed_response['rates']
+    rates = save_rates(exchange_rates.historical.parsed_response['rates'])
+    rates.values
+  end
+
+  def save_rates(rates)
+    request_option = RequestOption.create(options)
+    request_option.create_rate(values: rates)
   end
 end
