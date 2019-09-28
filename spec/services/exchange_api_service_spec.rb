@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe ExchangeRatesApiService do
@@ -5,7 +7,7 @@ describe ExchangeRatesApiService do
     it 'successfully' do
       success_response = response_stub('exchange_api_latest')
       allow_any_instance_of(ExchangeRatesApiService).to receive(:latest).and_return(success_response)
-      api = ExchangeRatesApiService.new()
+      api = ExchangeRatesApiService.new
       response = api.latest
 
       expect(response).to eq(success_response)
@@ -25,7 +27,7 @@ describe ExchangeRatesApiService do
     it 'missing start date' do
       missing_start_response = response_stub('exchange_api_historical_missing_start')
       allow_any_instance_of(ExchangeRatesApiService).to receive(:historical).and_return(missing_start_response)
-      api = ExchangeRatesApiService.new()
+      api = ExchangeRatesApiService.new
       response = api.historical
 
       expect(response['error']).to eq('missing start_at parameter')
@@ -39,6 +41,5 @@ describe ExchangeRatesApiService do
 
       expect(response['error']).to eq('missing end_at parameter')
     end
-
   end
 end

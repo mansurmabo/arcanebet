@@ -11,7 +11,7 @@ class ExchangeRatesApiService
       query: {
         base: options[:base],
         start_at: options[:start_date],
-        end_at: options[:end_date],
+        end_at: options[:end_date]
       }
     }
   end

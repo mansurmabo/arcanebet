@@ -10,7 +10,6 @@ class ExchangesController < ApplicationController
     @base = params[:base] || 'EUR'
     @target = params[:target] || 'USD'
     @duration = params[:duration] || 1
-
     @historical_rates = fetch_rates[:chart_rates]
     @today_rate = @historical_rates.last[:rate]
     @calculated_amount = multiply(@amount, @today_rate)
@@ -29,9 +28,9 @@ class ExchangesController < ApplicationController
     @exchange = Exchange.new(exchange_params)
 
     if @exchange.save
-      redirect_to dashboard_exchanges_path(exchange_params.merge(params[:exchange].permit(:duration))), notice: 'Exchange was successfully created.'
+      redirect_to dashboard_exchanges_path(exchange_params.merge(params[:exchange].permit(:duration)))
     else
-      redirect_to dashboard_exchanges_path, error: 'Exchange not created.'
+      redirect_to dashboard_exchanges_path
     end
   end
 
@@ -59,12 +58,14 @@ class ExchangesController < ApplicationController
   end
 
   def fetch_rates
-    client = ExchangesClientService.new({type: Exchange.apis[:exchange_rate], base: @base, target: @target, duration: @duration})
+    client = ExchangesClientService.new(type: Exchange.apis[:exchange_rate],
+                                        base: @base,
+                                        target: @target,
+                                        duration: @duration)
     client.call
   end
 
   def multiply(amount, rate)
     (amount.to_f * rate.to_f).round(3)
   end
-
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'fixtures/exchange_rates_fixture'
 
@@ -13,6 +15,5 @@ describe ExchangesClientService do
       expect(response[:chart_rates]).to eq(ExchangeRatesFixture::CHART_RATES)
       expect(response[:statistic_rates]).to eq(ExchangeRatesFixture::TABLE_RATES)
     end
-
   end
 end

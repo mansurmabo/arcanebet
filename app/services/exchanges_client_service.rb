@@ -14,7 +14,7 @@ class ExchangesClientService
     chart_rates = historical_rates
     statistic_rates = rates_per_week(chart_rates)
 
-    {chart_rates: historical_rates, statistic_rates: statistic_rates}
+    { chart_rates: historical_rates, statistic_rates: statistic_rates }
   end
 
   private
@@ -23,21 +23,29 @@ class ExchangesClientService
     rates = []
     chart_rates.each do |rate|
       week_number = rate[:week_number]
-      next if rates.find { |r| r[:week_number] == week_number }
+      next if skip_this(rates, week_number)
 
-      part = chart_rates.select { |r| r[:week_number] == week_number }
-      part_rates = part.map { |p| p[:rate] }
-      avg_rate = part_rates.inject { |sum, el| sum + el }.to_f / part_rates.size
-      rates.push(
-          year: Date.parse(rate[:date]).year,
-          week_number: week_number,
-          avg_rate: avg_rate.round(3),
-          highest: part_rates.max.round(3),
-          lowest: part_rates.min.round(3)
-      )
+      week_rates = rates_by_week(chart_rates, week_number)
+      rates.push(year: Date.parse(rate[:date]).year,
+                 week_number: week_number,
+                 avg_rate: week_avg_rate(week_rates),
+                 highest: week_rates.max.round(3),
+                 lowest: week_rates.min.round(3))
     end
 
     rates.reverse
+  end
+
+  def skip_this(rates, week_number)
+    rates.find { |r| r[:week_number] == week_number }
+  end
+
+  def rates_by_week(chart_rates, week_number)
+    chart_rates.select { |r| r[:week_number] == week_number }.map { |p| p[:rate] }
+  end
+
+  def week_avg_rate(week_rates)
+    (week_rates.inject { |sum, el| sum + el }.to_f / week_rates.size).round(3)
   end
 
   def historical_rates
@@ -59,10 +67,10 @@ class ExchangesClientService
 
   def options
     duration_days = @duration.to_i * 7
-    end_date = (Time.zone.now).strftime('%Y-%m-%d')
+    end_date = Time.zone.now.strftime('%Y-%m-%d')
     start_date = (Time.zone.now - duration_days.days).strftime('%Y-%m-%d')
 
-    {start_date: start_date, end_date: end_date, base: @base}
+    { start_date: start_date, end_date: end_date, base: @base }
   end
 
   def exchange_rate_api
